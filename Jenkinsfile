@@ -11,7 +11,7 @@ pipeline {
     stages {
         stage('Install Dependencies') {
             steps {
-                echo " Installing dependencies for galaxy-store application"
+                echo " Installing dependencies for galaxy-store app"
                 sh 'npm install --no-audit'
             }
         }

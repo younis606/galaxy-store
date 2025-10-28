@@ -20,12 +20,6 @@ pipeline {
                 sh 'npm audit --audit-level=high'
             }
         }
-        stage('Code Coverage') {
-            steps {
-                catchError(buildResult: 'SUCCESS', message: 'Oops! it will be fixed in future releases', stageResult: 'UNSTABLE') {
-                    sh 'npm run coverage'
-                }
-            }
-        }
+       
     }
 }

@@ -5,10 +5,7 @@ pipeline {
         nodejs 'nodejs-22-6-0'
     }
 
-    environment {
-        MONGO_URI = 'mongodb+srv://supercluster.d83jj.mongodb.net/superData'
-        MONGO_USERNAME = credentials('mongo-db-username')
-        MONGO_PASSWORD = credentials('mongo-db-password')
+    
     }
 
     stages {

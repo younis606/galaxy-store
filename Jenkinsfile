@@ -50,15 +50,15 @@ pipeline {
         stage('Quality Gate') {
             steps {
                 timeout(time: 1, unit: 'MINUTES') {
-                    waitForQualityGate abortPipeline: false
+                    waitForQualityGate abortPipeline: true
                 }    
             }
         }    
         stage('Unit Tests') {
-            when { expression { return false } }
+            
             steps {
                 echo 'Skipping Unit Tests temporarily...'
-                // sh 'npm test'
+                 sh 'npm test'
             }
         }
 

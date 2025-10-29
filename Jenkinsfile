@@ -56,6 +56,7 @@ pipeline {
         }
 
         stage('Unit Tests') {
+            when { expression { return false } }
             steps {
                 echo 'Skipping Unit Tests temporarily...'
                 // sh 'npm test'

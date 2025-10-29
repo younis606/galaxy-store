@@ -52,9 +52,9 @@ pipeline {
                 echo 'skip for now'
               //  timeout(time: 1, unit: 'MINUTES') {
                 //    waitForQualityGate abortPipeline: true
-                }    
-            }
-        }    
+            }    
+        }
+            
         stage('Unit Tests') {
             
             steps {

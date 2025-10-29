@@ -67,7 +67,7 @@ pipeline {
             steps {
                 script {
                     echo "Building Docker image for Galaxy Store..."
-                    sh 'docker build -t younis606/younis606/galaxy-store:${GIT_COMMIT} .'
+                    sh 'docker build -t younis606/younis606:5000/galaxy-store:${GIT_COMMIT} .'
                 }
             }
         }

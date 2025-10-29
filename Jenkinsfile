@@ -51,7 +51,9 @@ pipeline {
             steps {
                 timeout(time: 1, unit: 'MINUTES') {
                     waitForQualityGate abortPipeline: false
-
+                }    
+            }
+        }    
         stage('Unit Tests') {
             when { expression { return false } }
             steps {

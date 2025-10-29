@@ -59,5 +59,13 @@ pipeline {
         sh 'npm test'
     }
 }
+     stage('Build Docker Image') {
+    steps {
+        script {
+            echo "Building Docker image for Galaxy Store..."
+            sh 'docker build -t younis606/galaxy-store:${GIT_COMMIT} .'
+        }
+    }
+}    
  }
 }

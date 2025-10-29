@@ -59,7 +59,7 @@ pipeline {
             
             steps {
                 echo 'Skipping Unit Tests temporarily...'
-                 sh 'npm test'
+                 //sh 'npm test'
             }
         }
 

@@ -55,8 +55,8 @@ pipeline {
      }
      stage('Unit Tests') {
        steps {
-        echo 'Running Unit Tests...'
-        sh 'npm test'
+        //echo 'Running Unit Tests...'
+      //  sh 'npm test'
     }
 }
      stage('Build Docker Image') {

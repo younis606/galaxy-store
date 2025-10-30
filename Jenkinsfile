@@ -87,11 +87,11 @@ pipeline {
             steps {
                 script {
                     echo 'Pushing Docker image to Docker Hub...'
-                    withDockerRegistry(credentialsId: 'docker-hub-credentials', url: 'https://hub.docker.com/repository/docker/younis606/younis606/general') {
-                      sh '''
-                         docker push younis606/galaxy-store:${GIT_COMMIT}
-
-                        '''
+                    withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                sh '''
+                    echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin https://index.docker.io/v1/
+                    docker push younis606/galaxy-store:${GIT_COMMIT}
+                '''
                     }
                     
                }

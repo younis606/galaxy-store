@@ -71,5 +71,17 @@ pipeline {
                 }
             }
         }
+        stage('trivy scan') {
+            steps {
+                script {
+                    echo "Scanning Docker image for vulnerabilities with Trivy..."
+                    sh '''
+
+                    trivy image --exit-code 0 --format json -o trivy-image-HIGH-CRITICAL-results.json --severity HIGH,CRITICAL younis606/galaxy-store:${GIT_COMMIT}
+                   
+                   '''
+                }
+            }
+        }
     }
 }

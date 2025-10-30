@@ -103,7 +103,7 @@ pipeline {
             }
         }
 
-      stage('Update and Commit Image Tag') {
+     stage('Update and Commit Image Tag') {
     steps {
         script {
             sh '''
@@ -124,8 +124,6 @@ pipeline {
         }
     }
 }
-
-
 
     }
 }

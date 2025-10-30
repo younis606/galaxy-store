@@ -103,13 +103,11 @@ pipeline {
             }
         }
 
-       stage('Update and Commit Image Tag') {
-    when {
-        branch 'main'
-    }
+      stage('Update and Commit Image Tag') {
     steps {
         script {
             sh '''
+                echo "Updating image tag in gitops repo..."
                 git clone -b main https://github.com/younis606/galaxy-store-gitops
                 cd galaxy-store-gitops/kubernetes
 
@@ -127,5 +125,6 @@ pipeline {
         }
     }
 }
+
     }
 }

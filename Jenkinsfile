@@ -87,7 +87,7 @@ pipeline {
             steps {
                 script {
                     echo 'Pushing Docker image to Docker Hub...'
-                    withDockerRegistry(credentialsId: 'docker-hub-credentials', url: 'https://app.docker.com') {
+                    withDockerRegistry(credentialsId: 'docker-hub-credentials', url: 'https://hub.docker.com/repository/docker/younis606/younis606/general') {
                       sh '''
                          docker push younis606/galaxy-store:${GIT_COMMIT}
 

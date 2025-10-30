@@ -110,20 +110,21 @@ pipeline {
             steps {
                 script {
                     sh '''
-                    git clone -b main https://github.com/younis606/galaxy-store-gitops
+                     git clone -b main [https://github.com/younis606/galaxy-store-gitops](https://github.com/younis606/galaxy-store-gitops)
                     cd galaxy-store-gitops/kubernetes
-                    rm -rf galaxy-store-gitops
-                    git checkout main
-                    sed -i "s#image: .*#image: younis606/galaxy-store:${GIT_COMMIT}#g" kubernetes/deployment.yml
 
-                    git config user.name "Jenkins Automation"
-                    git config user.email "ci-bot@galaxy-store.local"
+                   git checkout main
+                   sed -i "s#image: .*#image: younis606/galaxy-store:${GIT_COMMIT}#g" deployment.yml
 
-                    git remote set-url origin https://$GITHUB_TOKEN@github.com/younis606/galaxy-store-gitops.git
-                    git add .
-                    git commit -m "Update image tag to ${GIT_COMMIT}"
-                    git push origin main
-                '''
+                   git config user.name "Jenkins Automation"
+                   git config user.email "ci-bot@galaxy-store.local"
+
+                   git remote set-url origin https://$GITHUB_TOKEN@github.com/younis606/galaxy-store-gitops.git
+                   git add .
+                   git commit -m "Update image tag to ${GIT_COMMIT}"
+                   git push origin main
+
+                   '''
                 }
             }
         }

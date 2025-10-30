@@ -1,6 +1,5 @@
 pipeline {
     agent any
-
     tools {
         nodejs 'nodejs-18-20-0'
     }
@@ -11,7 +10,6 @@ pipeline {
     }
 
     stages {
-
         stage('Checkout Code') {
             steps {
                 echo 'Cloning repository from GitHub...'
@@ -21,7 +19,7 @@ pipeline {
 
         stage('Install Dependencies') {
             steps {
-                echo "Installing dependencies for galaxy-store app"
+                echo 'Installing dependencies for galaxy-store app'
                 sh 'npm install --no-audit'
             }
         }
@@ -37,12 +35,12 @@ pipeline {
                 echo 'Running SonarQube analysis...'
                 withSonarQubeEnv('sonar-scanner') {
                     sh '''
-                        sonar-scanner \
-                          -Dsonar.projectKey=galaxy-app \
-                          -Dsonar.sources=. \
-                          -Dsonar.host.url=$SONAR_URL \
-                          -Dsonar.login=$SONAR_TOKEN
-                    '''
+                    sonar-scanner \
+                      -Dsonar.projectKey=galaxy-app \
+                      -Dsonar.sources=. \
+                      -Dsonar.host.url=$SONAR_URL \
+                      -Dsonar.login=$SONAR_TOKEN
+                '''
                 }
             }
         }
@@ -50,51 +48,83 @@ pipeline {
         stage('Quality Gate') {
             steps {
                 echo 'skip for now'
-              //  timeout(time: 1, unit: 'MINUTES') {
-                //    waitForQualityGate abortPipeline: true
-            }    
+            // timeout(time: 1, unit: 'MINUTES') {
+            //     waitForQualityGate abortPipeline: true
+            // }
+            }
         }
-            
+
         stage('Unit Tests') {
-            
             steps {
                 echo 'Skipping Unit Tests temporarily...'
-                 //sh 'npm test'
+            // sh 'npm test'
             }
         }
 
         stage('Build Docker Image') {
             steps {
                 script {
-                    echo "Building Docker image for Galaxy Store..."
+                    echo 'Building Docker image for Galaxy Store...'
                     sh 'docker build -t younis606/galaxy-store:${GIT_COMMIT} .'
                 }
             }
         }
-        stage('trivy scan') {
+
+        stage('Trivy Scan') {
             steps {
                 script {
-                    echo "Scanning Docker image for vulnerabilities with Trivy..."
+                    echo 'Scanning Docker image for vulnerabilities with Trivy...'
                     sh '''
-
-                    trivy image --exit-code 0 --format json -o trivy-image-HIGH-CRITICAL-results.json --severity HIGH,CRITICAL younis606/galaxy-store:${GIT_COMMIT}
-                   
-                   '''
+                    trivy image --exit-code 0 --format json \
+                    -o trivy-image-HIGH-CRITICAL-results.json \
+                    --severity HIGH,CRITICAL younis606/galaxy-store:${GIT_COMMIT}
+                '''
                 }
             }
         }
-        stage('push docker image') {
+
+        stage('Push Docker Image') {
             steps {
                 script {
                     echo 'Pushing Docker image to Docker Hub...'
-                    withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                sh '''
-                    echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin https://index.docker.io/v1/
-                    docker push younis606/galaxy-store:${GIT_COMMIT}
+                    withCredentials([
+                    usernamePassword(
+                        credentialsId: 'docker-hub-credentials',
+                        usernameVariable: 'DOCKER_USER',
+                        passwordVariable: 'DOCKER_PASS'
+                    )
+                ]) {
+                        sh '''
+                        echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin https://index.docker.io/v1/
+                        docker push younis606/galaxy-store:${GIT_COMMIT}
+                    '''
+                }
+                }
+            }
+        }
+
+        stage('Update and Commit Image Tag') {
+            when {
+                branch 'main'
+            }
+            steps {
+                script {
+                    sh '''
+                    git clone -b main https://github.com/younis606/galaxy-store-gitops
+                    cd galaxy-store-gitops/kubernetes
+                    rm -rf galaxy-store-gitops
+                    git checkout main
+                    sed -i "s#image: .*#image: younis606/galaxy-store:${GIT_COMMIT}#g" kubernetes/deployment.yml
+
+                    git config user.name "Jenkins Automation"
+                    git config user.email "ci-bot@galaxy-store.local"
+
+                    git remote set-url origin https://$GITHUB_TOKEN@github.com/younis606/galaxy-store-gitops.git
+                    git add .
+                    git commit -m "Update image tag to ${GIT_COMMIT}"
+                    git push origin main
                 '''
-                    }
-                    
-               }
+                }
             }
         }
     }

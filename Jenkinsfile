@@ -83,5 +83,19 @@ pipeline {
                 }
             }
         }
+        stage('push docker image') {
+            steps {
+                script {
+                    echo 'Pushing Docker image to Docker Hub...'
+                    withDockerRegistry(credentialsId: 'docker-hub-credentials', url: 'https://app.docker.com') {
+                      sh '''
+                         docker push younis606/galaxy-store:${GIT_COMMIT}
+
+                        '''
+                    }
+                    
+               }
+            }
+        }
     }
 }

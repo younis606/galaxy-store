@@ -111,7 +111,7 @@ pipeline {
             git checkout main
             git checkout -b feature-$BUILD_ID
             rm -rf galaxy-store-gitops
-            git clone -b main https://github.com/younis606/galaxy-store-gitops.git
+            git clone -b feature https://github.com/younis606/galaxy-store-gitops.git
             cd galaxy-store-gitops/kubernetes
             if [ -f deployment.yml ]; then
                 sed -i "s#image: .*#image: younis606/galaxy-store:${GIT_COMMIT}#g" deployment.yml

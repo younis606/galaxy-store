@@ -111,9 +111,9 @@ pipeline {
             git clone -b feature https://github.com/younis606/galaxy-store-gitops.git
             cd galaxy-store-gitops/kubernetes
             if [ -f deployment.yaml ]; then
-                sed -i "s#image: .*#image: younis606/galaxy-store:${GIT_COMMIT}#g" deployment.yaml
+                sed -i "s#image: .*#image: younis606/galaxy-store:${GIT_COMMIT}#g" deployment.yml
             else
-                echo "deployment.yaml not found!"
+                echo "deployment.yml not found!"
                 exit 1
             fi
             git config user.name "Jenkins Automation"

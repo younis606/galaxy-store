@@ -103,21 +103,17 @@ pipeline {
             }
         }
         stage('Update and Commit Image Tag') {
-            
-    steps {
-        script {
+          steps {
+           script {
             sh '''
             echo "Updating image tag in GitOps repo..."
-            
-            
             rm -rf galaxy-store-gitops
-            git clone -b main https://github.com/younis606/galaxy-store-gitops.git
-            cd galaxy-store-gitops
-            git checkout -b feature-$BUILD_ID
-            if [ -f deployment.yml ]; then
-                sed -i "s#image: .*#image: younis606/galaxy-store:${GIT_COMMIT}#g" deployment.yml
+            git clone -b feature https://github.com/younis606/galaxy-store-gitops.git
+            cd galaxy-store-gitops/kubernetes
+            if [ -f deployment.yaml ]; then
+                sed -i "s#image: .*#image: younis606/galaxy-store:${GIT_COMMIT}#g" deployment.yaml
             else
-                echo "deployment.yml not found!"
+                echo "deployment.yaml not found!"
                 exit 1
             fi
             git config user.name "Jenkins Automation"
@@ -125,7 +121,7 @@ pipeline {
             git remote set-url origin https://$GITHUB_TOKEN@github.com/younis606/galaxy-store-gitops.git
             git add .
             git commit -m "Update image tag to ${GIT_COMMIT}"
-            git push origin feature-$BUILD_ID
+            git push origin feature
             '''
         }
     }

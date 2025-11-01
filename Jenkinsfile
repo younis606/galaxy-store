@@ -103,9 +103,7 @@ pipeline {
             }
         }
         stage('Update and Commit Image Tag') {
-            when {
-                branch 'PR*'
-            }
+            
     steps {
         script {
             sh '''
@@ -132,9 +130,8 @@ pipeline {
     }
 }
      stage('Kubernetes Deployment - Raise PR') {
-    when {
-        branch 'PR*'
-    }
+    
+    
     steps {
         script {
             withCredentials([string(credentialsId: 'git-token', variable: 'GITHUB_TOKEN')]) {

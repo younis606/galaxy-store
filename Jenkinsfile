@@ -102,12 +102,12 @@ pipeline {
                 }
             }
         }
-
         stage('Update and Commit Image Tag') {
     steps {
         script {
             sh '''
             echo "Updating image tag in GitOps repo..."
+            rm -rf galaxy-store-gitops
             git clone -b main https://github.com/younis606/galaxy-store-gitops.git
             cd galaxy-store-gitops
             if [ -f deployment.yml ]; then
@@ -127,5 +127,6 @@ pipeline {
     }
 }
 
+        
     }
 }

@@ -103,26 +103,29 @@ pipeline {
             }
         }
 
-        stage('Update GitOps Repo') {
-            steps {
-                script {
-                    sh '''
-                    echo "Updating image tag in GitOps repo..."
-                    git clone -b main https://github.com/younis606/galaxy-store-gitops.git
-                    cd galaxy-store-gitops/kubernetes
-
-                    sed -i "s#image: .*#image: younis606/galaxy-store:${GIT_COMMIT}#g" deployment.yml
-
-                    git config user.name "Jenkins Automation"
-                    git config user.email "ci-bot@galaxy-store.local"
-
-                    git remote set-url origin https://$GITHUB_TOKEN@github.com/younis606/galaxy-store-gitops.git
-                    git add .
-                    git commit -m "Update image tag to ${GIT_COMMIT}"
-                    git push origin main
-                    '''
-                }
-            }
+        stage('Update and Commit Image Tag') {
+    steps {
+        script {
+            sh '''
+            echo "Updating image tag in GitOps repo..."
+            git clone -b main https://github.com/younis606/galaxy-store-gitops.git
+            cd galaxy-store-gitops
+            if [ -f deployment.yml ]; then
+                sed -i "s#image: .*#image: younis606/galaxy-store:${GIT_COMMIT}#g" deployment.yml
+            else
+                echo "deployment.yml not found!"
+                exit 1
+            fi
+            git config user.name "Jenkins Automation"
+            git config user.email "ci-bot@galaxy-store.local"
+            git remote set-url origin https://$GITHUB_TOKEN@github.com/younis606/galaxy-store-gitops.git
+            git add .
+            git commit -m "Update image tag to ${GIT_COMMIT}"
+            git push origin main
+            '''
         }
+    }
+}
+
     }
 }

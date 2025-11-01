@@ -61,11 +61,11 @@ pipeline {
             }
         }
 
-        stage('Build Docker Image') {
+        stage('Build Image with nerdctl') {
             steps {
                 script {
-                    echo 'Building Docker image for Galaxy Store...'
-                    sh 'docker build -t younis606/galaxy-store:${GIT_COMMIT} .'
+                    echo 'Building container image for Galaxy Store with nerdctl...'
+                    sh 'nerdctl build -t younis606/galaxy-store:${GIT_COMMIT} .'
                 }
             }
         }
@@ -73,7 +73,7 @@ pipeline {
         stage('Trivy Scan') {
             steps {
                 script {
-                    echo 'Scanning Docker image for vulnerabilities with Trivy...'
+                    echo 'Scanning container image for vulnerabilities with Trivy...'
                     sh '''
                     trivy image --exit-code 0 --format json \
                     -o trivy-image-HIGH-CRITICAL-results.json \
@@ -83,10 +83,10 @@ pipeline {
             }
         }
 
-        stage('Push Docker Image') {
+        stage('Push Image with nerdctl') {
             steps {
                 script {
-                    echo 'Pushing Docker image to Docker Hub...'
+                    echo 'Pushing container image to Docker Hub...'
                     withCredentials([
                         usernamePassword(
                             credentialsId: 'docker-hub-credentials',
@@ -95,8 +95,8 @@ pipeline {
                         )
                     ]) {
                         sh '''
-                        echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin https://index.docker.io/v1/
-                        docker push younis606/galaxy-store:${GIT_COMMIT}
+                        echo "$DOCKER_PASS" | nerdctl login -u "$DOCKER_USER" --password-stdin docker.io
+                        nerdctl push younis606/galaxy-store:${GIT_COMMIT}
                         '''
                     }
                 }

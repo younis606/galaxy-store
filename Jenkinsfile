@@ -103,29 +103,59 @@ pipeline {
             }
         }
         stage('Update and Commit Image Tag') {
+            when {
+                branch 'PR*'
+            }
     steps {
         script {
             sh '''
             echo "Updating image tag in GitOps repo..."
+            git checkout main
+            git checkout -b feature-$BUILD_ID
             rm -rf galaxy-store-gitops
             git clone -b main https://github.com/younis606/galaxy-store-gitops.git
-            cd galaxy-store-gitops
+            cd galaxy-store-gitops/kubernetes
             if [ -f deployment.yml ]; then
                 sed -i "s#image: .*#image: younis606/galaxy-store:${GIT_COMMIT}#g" deployment.yml
             else
                 echo "deployment.yml not found!"
-                exit 0
+                exit 1
             fi
             git config user.name "Jenkins Automation"
             git config user.email "ci-bot@galaxy-store.local"
             git remote set-url origin https://$GITHUB_TOKEN@github.com/younis606/galaxy-store-gitops.git
             git add .
             git commit -m "Update image tag to ${GIT_COMMIT}"
-            git push origin main
+            git push origin feature-$BUILD_ID
             '''
         }
     }
 }
+     stage('Kubernetes Deployment - Raise PR') {
+    when {
+        branch 'PR*'
+    }
+    steps {
+        script {
+            withCredentials([string(credentialsId: 'git-token', variable: 'GITHUB_TOKEN')]) {
+                sh '''
+                  echo "Creating Pull Request on GitHub..."
+                  curl -X POST \
+                  -H "Authorization: token $GITHUB_TOKEN" \
+                  -H "Accept: application/vnd.github.v3+json" \
+                  https://api.github.com/repos/younis606/galaxy-store-gitops/pulls \
+                 -d '{
+                    "title": "Updated Docker Image to ${GIT_COMMIT}",
+                    "head": "feature-${BUILD_ID}",
+                    "base": "main",
+                    "body": "Automated PR created by Jenkins pipeline to update deployment image tag."
+                }'
+                '''
+            }
+        }
+    }
+}
+      
 
         
     }

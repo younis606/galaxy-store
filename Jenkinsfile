@@ -102,7 +102,7 @@ pipeline {
                 }
             }
         }
-        stage('Update and Commit Image Tag') {
+       stage('Update and Commit Image Tag') {
     steps {
         script {
             withCredentials([string(credentialsId: 'git-token', variable: 'GITHUB_TOKEN')]) {
@@ -110,7 +110,9 @@ pipeline {
                 echo "Updating image tag in GitOps repo..."
                 rm -rf galaxy-store-gitops
                 git clone -b feature https://github.com/younis606/galaxy-store-gitops.git
-                cd galaxy-store-gitops/kubernetes
+                cd galaxy-store-gitops
+                git checkout -b feature-$BUILD_ID
+                cd kubernetes
                 if [ -f deployment.yml ]; then
                     sed -i "s#image: .*#image: younis606/galaxy-store:${GIT_COMMIT}#g" deployment.yml
                 else
@@ -128,6 +130,7 @@ pipeline {
         }
     }
 }
+
 
 stage('Kubernetes Deployment - Raise PR') {
     steps {

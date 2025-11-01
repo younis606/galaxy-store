@@ -153,6 +153,30 @@ stage('Kubernetes Deployment - Raise PR') {
         }
     }
 }
+            stage('DAST - OWASP ZAP') {
+              steps {
+               script {
+                sh '''
+                 # Set permissions for the current directory
+                 chmod 777 $(pwd)
+
+                 # Print user and group ID
+                 echo $(id -u):$(id -g)
+
+                 # Run OWASP ZAP API scan
+                 docker run -v $(pwd):/zap/wrk/:rw ghcr.io/zaproxy/zaproxy zap-api-scan.py \
+                 -t http://k8:30000/api-docs/ \
+                 -f openapi \
+                 -r zap_report.html \
+                 -w zap_report.md \
+                 -J zap_json_report.json \
+                 -c zap_ignore_rules
+
+                 '''
+            }
+        }
+    }
+
 
 
         

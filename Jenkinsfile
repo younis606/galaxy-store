@@ -40,7 +40,7 @@ pipeline {
                       -Dsonar.sources=. \
                       -Dsonar.host.url=$SONAR_URL \
                       -Dsonar.login=$SONAR_TOKEN
-                '''
+                    '''
                 }
             }
         }
@@ -48,16 +48,16 @@ pipeline {
         stage('Quality Gate') {
             steps {
                 echo 'skip for now'
-            // timeout(time: 1, unit: 'MINUTES') {
-            //     waitForQualityGate abortPipeline: true
-            // }
+                // timeout(time: 1, unit: 'MINUTES') {
+                //     waitForQualityGate abortPipeline: true
+                // }
             }
         }
 
         stage('Unit Tests') {
             steps {
                 echo 'Skipping Unit Tests temporarily...'
-            // sh 'npm test'
+                // sh 'npm test'
             }
         }
 
@@ -78,7 +78,7 @@ pipeline {
                     trivy image --exit-code 0 --format json \
                     -o trivy-image-HIGH-CRITICAL-results.json \
                     --severity HIGH,CRITICAL younis606/galaxy-store:${GIT_COMMIT}
-                '''
+                    '''
                 }
             }
         }
@@ -88,17 +88,17 @@ pipeline {
                 script {
                     echo 'Pushing Docker image to Docker Hub...'
                     withCredentials([
-                    usernamePassword(
-                        credentialsId: 'docker-hub-credentials',
-                        usernameVariable: 'DOCKER_USER',
-                        passwordVariable: 'DOCKER_PASS'
-                    )
-                ]) {
+                        usernamePassword(
+                            credentialsId: 'docker-hub-credentials',
+                            usernameVariable: 'DOCKER_USER',
+                            passwordVariable: 'DOCKER_PASS'
+                        )
+                    ]) {
                         sh '''
                         echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin https://index.docker.io/v1/
                         docker push younis606/galaxy-store:${GIT_COMMIT}
-                    '''
-                }
+                        '''
+                    }
                 }
             }
         }
@@ -107,23 +107,23 @@ pipeline {
             steps {
                 script {
                     sh '''
-                 echo "Updating image tag in gitops repo..."
-                 git clone -b main https://github.com/younis606/galaxy-store-gitops
-                 cd galaxy-store-gitops/kubernetes
+                    echo "Updating image tag in gitops repo..."
+                    git clone -b main https://github.com/younis606/galaxy-store-gitops
+                    cd galaxy-store-gitops/kubernetes
 
-                 sed -i "s#image: .*#image: younis606/galaxy-store:${GIT_COMMIT}#g" deployment.yml
+                    sed -i "s#image: .*#image: younis606/galaxy-store:${GIT_COMMIT}#g" deployment.yml
 
-                 git config user.name "Jenkins Automation"
-                 git config user.email "ci-bot@galaxy-store.local"
+                    git config user.name "Jenkins Automation"
+                    git config user.email "ci-bot@galaxy-store.local"
 
-                 git remote set-url origin https://$GITHUB_TOKEN@github.com/younis606/galaxy-store-gitops.git
-                 git add .
-                 git commit -m "Update image tag to ${GIT_COMMIT}"
-                 git push origin main
-
-                '''
-              }
+                    git remote set-url origin https://$GITHUB_TOKEN@github.com/younis606/galaxy-store-gitops.git
+                    git add .
+                    git commit -m "Update image tag to ${GIT_COMMIT}"
+                    git push origin main
+                    '''
+                }
             }
         }
+
     }
 }

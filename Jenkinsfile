@@ -108,11 +108,12 @@ pipeline {
         script {
             sh '''
             echo "Updating image tag in GitOps repo..."
-            git checkout main
-            git checkout -b feature-$BUILD_ID
+            
+            
             rm -rf galaxy-store-gitops
-            git clone -b feature https://github.com/younis606/galaxy-store-gitops.git
-            cd galaxy-store-gitops/kubernetes
+            git clone -b main https://github.com/younis606/galaxy-store-gitops.git
+            cd galaxy-store-gitops
+            git checkout -b feature-$BUILD_ID
             if [ -f deployment.yml ]; then
                 sed -i "s#image: .*#image: younis606/galaxy-store:${GIT_COMMIT}#g" deployment.yml
             else

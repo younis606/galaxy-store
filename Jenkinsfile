@@ -160,7 +160,7 @@ stage('Kubernetes Deployment - Raise PR') {
                    sh """
                      echo "Running ZAP scan on $API_URL"
                      docker run -v \$(pwd):/zap/wrk/:rw ghcr.io/zaproxy/zaproxy zap-api-scan.py \
-                        -t http://$API_URL/api-docs/ \
+                        -t https://172.31.1.100:30887/api-docs/
                         -f openapi \
                         -r zap_report.html \
                         -w zap_report.md \

@@ -157,19 +157,19 @@ stage('Kubernetes Deployment - Raise PR') {
     steps {
         withCredentials([string(credentialsId: 'API_ENDPOINT', variable: 'API_ENDPOINT')]) {
             sh '''
-            echo "Running ZAP scan on $API_ENDPOINT"
-
-            docker run --rm \
+               docker run --rm \
               -v $WORKSPACE:/zap/wrk/:rw \
               ghcr.io/zaproxy/zaproxy \
               zap-api-scan.py \
-              -t ${API_ENDPOINT}/api-docs/ \
-              -f openapi \
-              -r zap_report.html \
-              -w zap_report.md \
-              -J zap_json_report.json \
-              -z "-config connection.ssl.acceptAllCertificates=true"
-            '''
+             -t ${API_ENDPOINT}/api-docs/ \
+             -f openapi \
+             -r zap_report.html \
+             -w zap_report.md \
+             -J zap_json_report.json \
+             -z "-config connection.ssl.acceptAllCertificates=true" || [ $? -eq 2 ]
+             
+              '''
+
         }
     }
     

@@ -156,19 +156,24 @@ stage('Kubernetes Deployment - Raise PR') {
             stage('DAST - OWASP ZAP') {
              steps {
               script {
-                   withCredentials([string(credentialsId: 'API_ENDPOINT', variable: 'API_URL')]) {
-                   sh """
-                     echo "Running ZAP scan on $API_URL"
-                     docker run -v \$(pwd):/zap/wrk/:rw ghcr.io/zaproxy/zaproxy zap-api-scan.py \
-                        -t https://172.31.1.100:30887/api-docs/
-                        -f openapi \
-                        -r zap_report.html \
-                        -w zap_report.md \
-                        -J zap_json_report.json \
-                        -c zap_ignore_rules
+                   withCredentials([string(credentialsId: 'API_URL', variable: 'API_URL')]) {
+                   sh '''
+                       echo "Running ZAP scan on $API_URL"
+                       docker run --rm \
+                      -v $WORKSPACE:/zap/wrk/:rw \
+                      ghcr.io/zaproxy/zaproxy \
+                      zap-api-scan.py \
+                     -t $API_URL/api-docs/ \
+                     -f openapi \
+                     -r zap_report.html \
+                     -w zap_report.md \
+                     -J zap_json_report.json \
+                     -c zap_ignore_rules \
+                     -z "-config connection.ssl.acceptAllCertificates=true"
 
-                    
-                     """
+                     '''
+                 
+
                    }
                 }  
            }
@@ -179,4 +184,5 @@ stage('Kubernetes Deployment - Raise PR') {
 
         
     }
+
 }

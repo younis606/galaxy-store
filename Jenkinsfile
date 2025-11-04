@@ -6,7 +6,7 @@ pipeline {
     }
 
     environment {
-        SONAR_URL   = 'http://54.147.4.6:9000'
+        SONAR_URL = 'http://54.147.4.6:9000'
         SONAR_TOKEN = credentials('sonar-token')
     }
 
@@ -60,6 +60,24 @@ pipeline {
             steps {
                 echo 'Skipping Unit Tests temporarily'
                 // sh 'npm test'
+            }
+        }
+
+        stage('Code Coverage') {
+            steps {
+                catchError(
+                    buildResult: 'SUCCESS',
+                    stageResult: 'UNSTABLE',
+                    message: 'Oops! It will be fixed in future releases'
+                ) {
+                    echo 'Running Code Coverage...'
+                    sh '''
+                        npm run coverage
+                        echo "Code coverage report generated at coverage/lcov-report/index.html"
+                    '''
+                }
+
+               
             }
         }
 
@@ -144,12 +162,12 @@ pipeline {
                               -H "Authorization: token $GITHUB_TOKEN" \
                               -H "Accept: application/vnd.github.v3+json" \
                               https://api.github.com/repos/younis606/galaxy-store-gitops/pulls \
-                              -d "{
-                                \\"title\\": \\"Updated Docker Image to ${GIT_COMMIT}\\",
-                                \\"head\\": \\"feature-${BUILD_ID}\\",
-                                \\"base\\": \\"feature\\",
-                                \\"body\\": \\"Automated PR created by Jenkins pipeline to update deployment image tag.\\"
-                              }"
+                              -d '{
+                                "title": "Updated Docker Image to ${GIT_COMMIT}",
+                                "head": "feature-${BUILD_ID}",
+                                "base": "feature",
+                                "body": "Automated PR created by Jenkins pipeline to update deployment image tag."
+                              }'
                         '''
                     }
                 }
@@ -161,15 +179,15 @@ pipeline {
                 withCredentials([string(credentialsId: 'API_ENDPOINT', variable: 'API_ENDPOINT')]) {
                     sh '''
                         docker run --rm \
-                          -v $WORKSPACE:/zap/wrk/:rw \
-                          ghcr.io/zaproxy/zaproxy \
-                          zap-api-scan.py \
-                          -t ${API_ENDPOINT}/api-docs/ \
-                          -f openapi \
-                          -r zap_report.html \
-                          -w zap_report.md \
-                          -J zap_json_report.json \
-                          -z "-config connection.ssl.acceptAllCertificates=true" || [ $? -eq 2 ]
+                        -v $WORKSPACE:/zap/wrk/:rw \
+                        ghcr.io/zaproxy/zaproxy \
+                        zap-api-scan.py \
+                        -t ${API_ENDPOINT}/api-docs/ \
+                        -f openapi \
+                        -r zap_report.html \
+                        -w zap_report.md \
+                        -J zap_json_report.json \
+                        -z "-config connection.ssl.acceptAllCertificates=true" || [ $? -eq 2 ]
                     '''
                 }
             }
@@ -199,6 +217,16 @@ pipeline {
                 reportTitles: 'Test Coverage Results',
                 useWrapperFileDirectly: true
             ])
+             publishHTML([
+                    allowMissing: true,
+                    alwaysLinkToLastBuild: true,
+                    keepAll: true,
+                    reportDir: 'coverage/lcov-report',
+                    reportFiles: 'index.html',
+                    reportName: 'Code Coverage Report',
+                    reportTitles: 'Galaxy Store Coverage Results',
+                    useWrapperFileDirectly: true
+                ])
         }
 
         failure {
@@ -210,3 +238,4 @@ pipeline {
         }
     }
 }
+

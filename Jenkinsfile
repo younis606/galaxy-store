@@ -167,15 +167,46 @@ stage('Kubernetes Deployment - Raise PR') {
              -w zap_report.md \
              -J zap_json_report.json \
              -z "-config connection.ssl.acceptAllCertificates=true" || [ $? -eq 2 ]
-             
+
               '''
 
         }
     }
     
 }
-
-        
+       
     }
 
+}post {
+    always {
+        script {
+            echo "Cleaning up workspace..."
+            if (fileExists('galaxy-store-gitops')) {
+                sh 'rm -rf galaxy-store-gitops'
+            }
+        }
+
+        echo " Publishing test and coverage reports..."
+
+        junit allowEmptyResults: true, testResults: 'test-results.xml'
+
+        publishHTML([
+            allowMissing: true,
+            alwaysLinkToLastBuild: true,
+            keepAll: true,
+            reportDir: 'coverage/lcov-report',
+            reportFiles: 'index.html',
+            reportName: 'Galaxy Store - Code Coverage',
+            reportTitles: 'Test Coverage Results',
+            useWrapperFileDirectly: true
+        ])
+    }
+
+    failure {
+        echo " Pipeline failed! Check logs above for errors."
+    }
+
+    success {
+        echo " Galaxy Store pipeline completed successfully!"
+    }
 }

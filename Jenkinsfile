@@ -1,3 +1,4 @@
+@Library('jenkins_sharedlibrary') _
 pipeline {
     agent any
 
@@ -90,18 +91,16 @@ pipeline {
             }
         }
 
-        stage('Trivy Scan') {
-            steps {
-                script {
-                    echo 'Scanning Docker image for vulnerabilities with Trivy...'
-                    sh '''
-                        trivy image --exit-code 0 --format json \
-                        -o trivy-image-HIGH-CRITICAL-results.json \
-                        --severity HIGH,CRITICAL younis606/galaxy-store:${GIT_COMMIT}
-                    '''
-                }
-            }
-        }
+        stage('Trivy Scan (Shared Library)') {
+          steps {
+            script {
+              trivyScan(
+                 imageName: "younis606/galaxy-store:${GIT_COMMIT}",
+                 severity: "HIGH,CRITICAL",
+                 exitCode: 0
+                )}
+          }
+      }
 
         stage('Push Docker Image') {
             steps {
